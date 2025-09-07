@@ -193,6 +193,7 @@ export default function Home() {
         <table className="w-full border border-pink-500 rounded-lg overflow-hidden shadow-lg">
           <thead className="bg-gray-800 text-pink-400">
             <tr>
+              <th className="border border-pink-500 px-3 py-2">S.No.</th>
               <th className="border border-pink-500 px-3 py-2">Name</th>
               <th className="border border-pink-500 px-3 py-2">Branch</th>
               <th className="border border-pink-500 px-3 py-2">Semester</th>
@@ -205,13 +206,10 @@ export default function Home() {
                 key={i}
                 className="hover:bg-gray-700 hover:text-pink-300 transition"
               >
+                <td className="border border-pink-500 px-3 py-2">{i + 1}</td>
                 <td className="border border-pink-500 px-3 py-2">{row.Name}</td>
-                <td className="border border-pink-500 px-3 py-2">
-                  {row.Branch}
-                </td>
-                <td className="border border-pink-500 px-3 py-2">
-                  {row.Semester}
-                </td>
+                <td className="border border-pink-500 px-3 py-2">{row.Branch}</td>
+                <td className="border border-pink-500 px-3 py-2">{row.Semester}</td>
                 <td className="border border-pink-500 px-3 py-2">{row.CGPA}</td>
               </tr>
             ))}
