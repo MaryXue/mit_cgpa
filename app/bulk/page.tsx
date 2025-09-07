@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Papa from "papaparse";
 import Statistics from "../components/Statistics";
 
@@ -17,7 +17,7 @@ export default function BulkSearchPage() {
   const [nameList, setNameList] = useState("");
 
   // Load master.csv once
-  useState(() => {
+  useEffect(() => {
     Papa.parse("/master.csv", {
       download: true,
       header: true,
