@@ -16,6 +16,10 @@ export default function BulkSearchPage() {
   const [filtered, setFiltered] = useState<Student[]>([]);
   const [nameList, setNameList] = useState("");
 
+  // NEW: store unique semesters and current selection
+  const [semesters, setSemesters] = useState<string[]>([]);
+  const [semesterFilter, setSemesterFilter] = useState("All");
+
   // Load master.csv once
   useEffect(() => {
     Papa.parse("/master.csv", {
@@ -24,16 +28,23 @@ export default function BulkSearchPage() {
       skipEmptyLines: true,
       complete: (results) => {
         const rawData = results.data as any[];
-        const normalized = rawData.map((row) => ({
+        const normalized: Student[] = rawData.map((row) => ({
           Name: row["Student Name"],
           Branch: row["Course Name"],
           Semester: row.Semester || row["Semester No"],
           CGPA: Number(row.CGPA || row.GPA),
         }));
+
         setAllData(normalized);
+
+        // extract unique semesters
+        const uniqueSemesters = Array.from(
+          new Set(normalized.map((r) => r.Semester))
+        );
+        setSemesters(uniqueSemesters);
       },
     });
-  });
+  }, []);
 
   // Handle pasted names
   const handleNameListSearch = () => {
@@ -42,14 +53,19 @@ export default function BulkSearchPage() {
       .map((n) => n.trim().toLowerCase())
       .filter((n) => n.length > 0);
 
-    if (names.length === 0) {
-      setFiltered([]);
-      return;
+    let matches = allData;
+
+    if (names.length > 0) {
+      matches = matches.filter((row) =>
+        names.includes(row.Name.toLowerCase())
+      );
     }
 
-    const matches = allData.filter((row) =>
-      names.includes(row.Name.toLowerCase())
-    );
+    // apply semester filter
+    if (semesterFilter !== "All") {
+      matches = matches.filter((row) => row.Semester === semesterFilter);
+    }
+
     setFiltered(matches);
   };
 
@@ -63,9 +79,15 @@ export default function BulkSearchPage() {
           .map((row) => Object.values(row)[0]) // assume first column has names
           .map((n: any) => String(n).trim().toLowerCase());
 
-        const matches = allData.filter((row) =>
+        let matches = allData.filter((row) =>
           names.includes(row.Name.toLowerCase())
         );
+
+        // apply semester filter
+        if (semesterFilter !== "All") {
+          matches = matches.filter((row) => row.Semester === semesterFilter);
+        }
+
         setFiltered(matches);
       },
     });
@@ -112,6 +134,23 @@ export default function BulkSearchPage() {
                        hover:file:bg-cyan-500"
           />
         </div>
+
+        {/* Semester filter */}
+        <div className="flex flex-col gap-2">
+          <label className="text-cyan-400">Filter by Semester</label>
+          <select
+            value={semesterFilter}
+            onChange={(e) => setSemesterFilter(e.target.value)}
+            className="p-2 rounded bg-gray-800 border border-cyan-500 text-white"
+          >
+            <option value="All">All Semesters</option>
+            {semesters.map((s, i) => (
+              <option key={i} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Results */}
@@ -121,6 +160,7 @@ export default function BulkSearchPage() {
           <table className="w-full border-collapse border border-cyan-500 text-sm">
             <thead>
               <tr className="bg-gray-800 text-cyan-400">
+                <th className="border border-cyan-500 px-2 py-1">S.No.</th>
                 <th className="border border-cyan-500 px-2 py-1">Name</th>
                 <th className="border border-cyan-500 px-2 py-1">Branch</th>
                 <th className="border border-cyan-500 px-2 py-1">Semester</th>
@@ -130,6 +170,7 @@ export default function BulkSearchPage() {
             <tbody>
               {filtered.map((row, i) => (
                 <tr key={i} className="hover:bg-gray-800">
+                  <td className="border border-cyan-500 px-2 py-1">{i + 1}</td>
                   <td className="border border-cyan-500 px-2 py-1">{row.Name}</td>
                   <td className="border border-cyan-500 px-2 py-1">{row.Branch}</td>
                   <td className="border border-cyan-500 px-2 py-1">{row.Semester}</td>
